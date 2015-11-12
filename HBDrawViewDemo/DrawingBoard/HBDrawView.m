@@ -88,9 +88,9 @@
             }
         }];
         
-        
+        __block UIImageView *imageboard = self.boardImage;
         [_drawBoard getChangeBoardImage:^(UIImage *boardBackImage) {
-            self.boardImage.image = boardBackImage;
+            imageboard.image = boardBackImage;
         }];
     }
     return _drawBoard;
