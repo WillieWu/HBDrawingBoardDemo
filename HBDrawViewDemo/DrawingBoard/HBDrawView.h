@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HBDrawingBoard.h"
 @class HBDrawView;
 
 typedef NS_ENUM(NSInteger, actionOpen) {
@@ -18,6 +19,7 @@ typedef NS_ENUM(NSInteger, actionOpen) {
 
 - (void)drawView:(HBDrawView *)drawView action:(actionOpen)action;
 
+
 @end
 
 @interface HBDrawView : UIView
@@ -27,6 +29,9 @@ typedef NS_ENUM(NSInteger, actionOpen) {
 
 /**设置背景图片***/
 - (void)setDrawBoardImage:(UIImage *)image;
+
+/**设置画笔形状***/
+- (void)setDrawBoardShapeType:(HBDrawingShapeType )shapType;
 
 @property (nonatomic, weak) id<HBDrawViewDelegate>  delegate;
 

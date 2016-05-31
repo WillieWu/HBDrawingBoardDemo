@@ -17,10 +17,32 @@ typedef NS_ENUM(NSInteger, HBDrawingStatus)
 
 };
 
+typedef NS_ENUM(NSInteger, HBDrawingShapeType)
+{
+    HBDrawingShapeCurve = 0,//曲线
+    HBDrawingShapeLine,//直线
+    HBDrawingShapeEllipse,//椭圆
+    HBDrawingShapeRect,//矩形
+    
+};
+
 typedef void(^drawStatusBlock)(HBDrawingStatus drawingStatus, HBDrawModel *model);
 typedef void(^boardImageBlock)(UIImage *boardBackImage);
 
 @interface HBDrawingBoard : UIView
+
+/**
+ *  @author 李泉, 16-05-31 16:05:35
+ *
+ *  @brief 是否是橡皮擦状态，默认为NO
+ */
+@property (nonatomic, assign) BOOL ise;
+/**
+ *  @author 李泉, 16-05-31 16:05:46
+ *
+ *  @brief 画笔类型
+ */
+@property (nonatomic, assign) HBDrawingShapeType shapType;
 /**
  *  画笔宽度
  */
@@ -81,9 +103,10 @@ typedef void(^boardImageBlock)(UIImage *boardBackImage);
 
 @property (nonatomic, strong) UIColor *pathColor;//画笔颜色
 @property (nonatomic, assign) BOOL isEraser;//橡皮擦
+@property (nonatomic, assign) HBDrawingShapeType shapType;
 
-+ (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth;//初始化对象
-- (void)pathLineToPoint:(CGPoint)movePoint;//画
++ (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth isEraser:(BOOL)isEraser;//初始化对象
+- (void)pathLineToPoint:(CGPoint)movePoint WithType:(HBDrawingShapeType)shapeType;//画
 - (void)drawPath;//绘制
 @end
 

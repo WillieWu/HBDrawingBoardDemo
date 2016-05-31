@@ -7,7 +7,6 @@
 //
 
 #import "HBDrawView.h"
-#import "HBDrawingBoard.h"
 #import "HBDrawSettingBoard.h"
 #import "ZXCustomWindow.h"
 
@@ -55,6 +54,11 @@
 - (void)setDrawBoardImage:(UIImage *)image
 {
     self.boardImage.image = image;
+}
+/**设置画笔形状***/
+- (void)setDrawBoardShapeType:(HBDrawingShapeType )shapType
+{
+    self.drawBoard.shapType = shapType;
 }
 
 #pragma mark - getter
@@ -107,7 +111,12 @@
             
             switch (type) {
                 case setTypePen:
-
+                {
+                    self.drawBoard.ise = NO;
+                    self.drawBoard.lineColor = [UIColor whiteColor];
+                    self.drawBoard.shapType = HBDrawingShapeCurve;
+                    self.drawBoard.lineWidth = 1.5;
+                }
                     break;
                 case setTypeCamera:
                 {
