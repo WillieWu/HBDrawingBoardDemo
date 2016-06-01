@@ -34,9 +34,8 @@
     [self drawSetting:nil];
 }
 - (IBAction)drawSetting:(id)sender {
-    
+    [self.drawView setDrawBoardShapeType:((UIButton *)sender).tag];
     [self.drawView showSettingBoard];
-    
 }
 #pragma mark - UIImagePickerControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info

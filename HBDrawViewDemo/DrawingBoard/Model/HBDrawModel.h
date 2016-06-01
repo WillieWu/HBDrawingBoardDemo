@@ -29,4 +29,5 @@
 @property (nonatomic, strong) NSNumber * width;
 @property (nonatomic, strong) NSNumber * hight;
 @property (nonatomic, strong) NSNumber * isEraser;
+@property (nonatomic, strong) NSNumber * shapType;
 @end

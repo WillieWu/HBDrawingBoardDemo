@@ -31,7 +31,7 @@
 
 @end
 
-static BOOL ise = NO;
+
 
 @implementation HBDrawingBoard
 
@@ -91,19 +91,19 @@ static BOOL ise = NO;
 }
 - (void)eraser
 {
-    if (!ise) {
+    if (!self.ise) {
         //保存上次绘制状态
         _lastColor = self.lineColor;
         _lastLineWidth = self.lineWidth;
         
         //设置橡皮擦属性
         self.lineColor = [UIColor clearColor];
-        ise = YES;
+        self.ise = YES;
         
     }else{
         
-        ise = NO;
-        
+        self.ise = NO;
+        self.shapType = HBDrawingShapeCurve;
         self.lineColor = _lastColor;
         self.lineWidth = _lastLineWidth;
         
@@ -144,7 +144,7 @@ static BOOL ise = NO;
     
     HBDrawPoint *point = [model.pointList firstObject];
     
-    HBPath *path = [HBPath pathToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) pathWidth:model.paintSize.floatValue];
+    HBPath *path = [HBPath pathToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) pathWidth:model.paintSize.floatValue isEraser:self.ise];
     path.pathColor = [UIColor colorWithHexString:model.paintColor];
     path.isEraser = model.isEraser.boolValue;
     
@@ -155,7 +155,7 @@ static BOOL ise = NO;
     
     [marray enumerateObjectsUsingBlock:^(HBDrawPoint *point, NSUInteger idx, BOOL *stop) {
         
-        [path pathLineToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp)];
+        [path pathLineToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) WithType:self.shapType];
         
         [self setNeedsDisplay];
         
@@ -186,7 +186,7 @@ static BOOL ise = NO;
     
     CGPoint point = [self getTouchSet:touches];
 
-    HBPath *path = [HBPath pathToPoint:point pathWidth:self.lineWidth];
+    HBPath *path = [HBPath pathToPoint:point pathWidth:self.lineWidth isEraser:self.ise];
     
     path.pathColor = self.lineColor;
 
@@ -209,7 +209,14 @@ static BOOL ise = NO;
 
     HBPath *path = [self.paths lastObject];
     
-    [path pathLineToPoint:point];
+    [path pathLineToPoint:point WithType:self.shapType];
+    
+    if (self.shapType == HBDrawingShapeCurve) {
+        [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
+    }
+    if (self.shapType == HBDrawingShapeLine || ((self.shapType == HBDrawingShapeRect)||((self.shapType == HBDrawingShapeEllipse) && !(self.tempPoints.count == 1)))) {
+        [self.tempPoints removeLastObject];
+    }
     
     [self setNeedsDisplay];
     
@@ -232,8 +239,9 @@ static BOOL ise = NO;
     HBDrawModel *model = [[HBDrawModel alloc] init];
     model.paintColor = [self.lineColor toColorString];
     model.paintSize = @(self.lineWidth);
-    model.isEraser = [NSNumber numberWithBool:ise];
+    model.isEraser = [NSNumber numberWithBool:self.ise];
     model.pointList = self.tempPoints;
+    model.shapType = [NSNumber numberWithInteger:self.shapType];
     
     if (self.statusBlock) {
         self.statusBlock(HBDrawingStatusEnd,model);
@@ -266,6 +274,14 @@ static BOOL ise = NO;
     }
     return _tempPath;
 }
+- (void)setShapType:(HBDrawingShapeType)shapType
+{
+    if (self.ise) {
+        return;
+    }
+    _shapType = shapType;
+}
+
 - (void)setBoardBackImage:(UIImage *)boardBackImage
 {
     _boardBackImage = boardBackImage;
@@ -277,7 +293,7 @@ static BOOL ise = NO;
 }
 - (void)setLineColor:(UIColor *)lineColor
 {
-    if (ise) {
+    if (self.ise) {
         
         _lastColor = lineColor;
         
@@ -302,34 +318,91 @@ static BOOL ise = NO;
 @interface HBPath()
 
 @property (nonatomic, strong) UIBezierPath *bezierPath;
+@property (nonatomic, assign) CGPoint beginPoint;
+@property (nonatomic, assign) CGFloat pathWidth;
 
 @end
 
 @implementation HBPath
 
-+ (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth
+
++ (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth isEraser:(BOOL)isEraser
 {
     HBPath *path = [[HBPath alloc] init];
-    path.isEraser = ise;
+    path.beginPoint = beginPoint;
+    path.pathWidth = pathWidth;
+    path.isEraser = isEraser;
     UIBezierPath *bezierPath = [UIBezierPath bezierPath];
     bezierPath.lineCapStyle = kCGLineCapRound;
     bezierPath.lineJoinStyle = kCGLineJoinRound;
     bezierPath.lineWidth = pathWidth;
     [bezierPath moveToPoint:beginPoint];
     path.bezierPath = bezierPath;
-
+    
     return path;
 }
-- (void)pathLineToPoint:(CGPoint)movePoint
-{
-    [self.bezierPath addLineToPoint:movePoint];
 
+//HBDrawingShapeCurve = 0,//曲线
+//HBDrawingShapeLine,//直线
+//HBDrawingShapeEllipse,//椭圆
+//HBDrawingShapeRect,//矩形
+- (void)pathLineToPoint:(CGPoint)movePoint WithType:(HBDrawingShapeType)shapeType
+{
+    //判断绘图类型
+    _shapType = shapeType;
+    switch (shapeType) {
+        case HBDrawingShapeCurve:
+        {
+            [self.bezierPath addLineToPoint:movePoint];
+            
+        }
+            break;
+        case HBDrawingShapeLine:
+        {
+            self.bezierPath = [UIBezierPath bezierPath];
+            self.bezierPath.lineCapStyle = kCGLineCapRound;
+            self.bezierPath.lineJoinStyle = kCGLineJoinRound;
+            self.bezierPath.lineWidth = self.pathWidth;
+            [self.bezierPath moveToPoint:self.beginPoint];
+            [self.bezierPath addLineToPoint:movePoint];
+        }
+            break;
+        case HBDrawingShapeEllipse:
+        {
+            self.bezierPath = [UIBezierPath bezierPathWithRect:[self getRectWithStartPoint:self.beginPoint endPoint:movePoint]];
+            self.bezierPath.lineCapStyle = kCGLineCapRound;
+            self.bezierPath.lineJoinStyle = kCGLineJoinRound;
+            self.bezierPath.lineWidth = self.pathWidth;
+        }
+            break;
+        case HBDrawingShapeRect:
+        {
+            self.bezierPath = [UIBezierPath bezierPathWithOvalInRect:[self getRectWithStartPoint:self.beginPoint endPoint:movePoint]];
+            self.bezierPath.lineCapStyle = kCGLineCapRound;
+            self.bezierPath.lineJoinStyle = kCGLineJoinRound;
+            self.bezierPath.lineWidth = self.pathWidth;
+        }
+            break;
+        default:
+            break;
+    }
 }
 - (void)drawPath
 {
-
     [self.pathColor set];
     if (self.isEraser) [self.bezierPath strokeWithBlendMode:kCGBlendModeClear alpha:1.0];
     [self.bezierPath stroke];
 }
+
+- (CGRect)getRectWithStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint
+{
+    CGPoint orignal = startPoint;
+    if (startPoint.x > endPoint.x) {
+        orignal = endPoint;
+    }
+    CGFloat width = fabs(startPoint.x - endPoint.x);
+    CGFloat height = fabs(startPoint.y - endPoint.y);
+    return CGRectMake(orignal.x , orignal.y , width, height);
+}
+
 @end
