@@ -100,6 +100,7 @@ typedef void(^boardImageBlock)(UIImage *boardBackImage);
 
 #pragma mark - HBPath
 @interface HBPath : NSObject
+@property (nonatomic, strong) CAShapeLayer *shape;
 
 @property (nonatomic, strong) UIColor *pathColor;//画笔颜色
 @property (nonatomic, assign) BOOL isEraser;//橡皮擦

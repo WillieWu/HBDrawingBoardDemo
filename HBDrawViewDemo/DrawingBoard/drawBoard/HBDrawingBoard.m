@@ -19,6 +19,7 @@
     UIColor *_lastColor;
     CGFloat _lastLineWidth;
 }
+
 @property (nonatomic, strong) NSMutableArray *paths;
 
 @property (nonatomic, copy) drawStatusBlock statusBlock;
@@ -52,41 +53,49 @@
     return self;
 }
 
-- (void)drawRect:(CGRect)rect
-{
-
-    for (HBPath *path in self.paths) {
-        
-        [path drawPath];
-        
-    }
-    
-}
+//- (void)drawRect:(CGRect)rect
+//{
+////
+//    for (HBPath *path in self.paths) {
+//        
+//        [path drawPath];
+//        
+//    }
+//
+//}
 #pragma mark - Public_Methd
 - (void)clearAll
 {
+    
+    [self.layer.sublayers  makeObjectsPerformSelector:@selector(removeFromSuperlayer)];
+    
     [self.paths removeAllObjects];
     
-    [self setNeedsDisplay];
+//    [self setNeedsDisplay];
 }
 - (void)backToLastDraw
 {
-    if ([self.paths lastObject])
-        [self.tempPath addObject:[self.paths lastObject]];
+    HBPath *lastpath = [self.paths lastObject];
+    if (lastpath)
+        [self.tempPath addObject:lastpath];
     
     [self.paths removeLastObject];
     
-    [self setNeedsDisplay];
+    [lastpath.shape removeFromSuperlayer];
+    
+//    [self setNeedsDisplay];
     
 }
 - (void)regeneration
 {
-    if ([self.tempPath lastObject])
-        [self.paths addObject:[self.tempPath lastObject]];
+    HBPath *lastpath = [self.tempPath lastObject];
+    if (lastpath)
+        [self.paths addObject:lastpath];
     
     [self.tempPath removeLastObject];
     
-    [self setNeedsDisplay];
+    [self.layer addSublayer:lastpath.shape];
+//    [self setNeedsDisplay];
     
 }
 - (void)eraser
@@ -112,8 +121,9 @@
 }
 - (void)saveCurrentImageToAlbum
 {
-
-    UIGraphicsBeginImageContext(self.bounds.size);
+    CGSize screen_size = [UIScreen mainScreen].bounds.size;
+    
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(screen_size.width * [UIScreen mainScreen].scale, screen_size.height * [UIScreen mainScreen].scale), NO, 0.0);
     
     CGContextRef context = UIGraphicsGetCurrentContext();
     
@@ -173,13 +183,12 @@
     self.boardImage = boardImage;
 }
 #pragma mark - CustomMethd
-- (CGPoint)getTouchSet:(NSSet *)touches
-{
+- (CGPoint)getTouchSet:(NSSet *)touches{
+    
     UITouch *touch = [touches anyObject];
      return [touch locationInView:self];
 
 }
-
 #pragma mark - Touch
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -187,15 +196,21 @@
     CGPoint point = [self getTouchSet:touches];
 
     HBPath *path = [HBPath pathToPoint:point pathWidth:self.lineWidth isEraser:self.ise];
-    
-    path.pathColor = self.lineColor;
 
+    path.shape.strokeColor = self.lineColor.CGColor;
+
+    path.pathColor = self.lineColor;
+    
     [self.paths addObject:path];
     
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
     
-    [self setNeedsDisplay];
-    
+//    if (self.ise) {
+//        [self setNeedsDisplay];
+//    }else{
+            [self.layer addSublayer:path.shape];
+//    }
+
     if (self.statusBlock) {
         self.statusBlock(HBDrawingStatusMove,nil);
     }
@@ -218,8 +233,8 @@
         [self.tempPoints removeLastObject];
     }
     
-    [self setNeedsDisplay];
-    
+//    [self setNeedsDisplay];
+
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
     
     if (self.statusBlock) {
@@ -248,7 +263,6 @@
     }
     //清空
     [self.tempPoints removeAllObjects];
-
 
 }
 
@@ -314,7 +328,6 @@
 @end
 
 #pragma mark - HBPath
-
 @interface HBPath()
 
 @property (nonatomic, strong) UIBezierPath *bezierPath;
@@ -332,16 +345,25 @@
     path.beginPoint = beginPoint;
     path.pathWidth = pathWidth;
     path.isEraser = isEraser;
+    
     UIBezierPath *bezierPath = [UIBezierPath bezierPath];
+    bezierPath.lineWidth = pathWidth;
     bezierPath.lineCapStyle = kCGLineCapRound;
     bezierPath.lineJoinStyle = kCGLineJoinRound;
-    bezierPath.lineWidth = pathWidth;
     [bezierPath moveToPoint:beginPoint];
     path.bezierPath = bezierPath;
     
+    CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
+    shapeLayer.lineCap = kCALineCapRound;
+    shapeLayer.lineJoin = kCALineJoinRound;
+    shapeLayer.lineWidth = pathWidth;
+    shapeLayer.fillColor = [UIColor clearColor].CGColor;
+    shapeLayer.path = bezierPath.CGPath;
+    path.shape = shapeLayer;
+    
+    
     return path;
 }
-
 //HBDrawingShapeCurve = 0,//曲线
 //HBDrawingShapeLine,//直线
 //HBDrawingShapeEllipse,//椭圆
@@ -354,7 +376,7 @@
         case HBDrawingShapeCurve:
         {
             [self.bezierPath addLineToPoint:movePoint];
-            
+            if (self.isEraser) [self.bezierPath strokeWithBlendMode:kCGBlendModeClear alpha:1.0];
         }
             break;
         case HBDrawingShapeLine:
@@ -386,6 +408,7 @@
         default:
             break;
     }
+    self.shape.path = self.bezierPath.CGPath;
 }
 - (void)drawPath
 {

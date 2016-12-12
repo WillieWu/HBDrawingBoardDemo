@@ -1,8 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
@@ -43,7 +47,7 @@
                             </connections>
                         </button>
                     </subviews>
-                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstItem="130-Zl-6bG" firstAttribute="width" secondItem="8EL-Lb-Lqm" secondAttribute="width" id="2Hb-Sz-MJD"/>
                         <constraint firstItem="130-Zl-6bG" firstAttribute="top" secondItem="m18-ID-szi" secondAttribute="top" id="3u2-lt-GNH"/>
@@ -74,7 +78,7 @@
                             <rect key="frame" x="135" y="15" width="465" height="40"/>
                             <subviews>
                                 <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctg-qb-z7i">
-                                    <rect key="frame" x="0.0" y="0.0" width="116" height="40"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="116.5" height="40"/>
                                     <state key="normal" image="xiangpica"/>
                                     <connections>
                                         <action selector="eraser:" destination="iN0-l3-epB" eventType="touchUpInside" id="evL-sw-PsN"/>
@@ -88,7 +92,7 @@
                                     </connections>
                                 </button>
                                 <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QBC-DT-PAc">
-                                    <rect key="frame" x="233" y="0.0" width="116" height="40"/>
+                                    <rect key="frame" x="232.5" y="0.0" width="116.5" height="40"/>
                                     <state key="normal" image="qianjin"/>
                                     <connections>
                                         <action selector="revocation:" destination="iN0-l3-epB" eventType="touchUpInside" id="f4G-yS-2lU"/>
@@ -102,7 +106,7 @@
                                     </connections>
                                 </button>
                             </subviews>
-                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            <color key="backgroundColor" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="trailing" secondItem="3yt-hg-yWb" secondAttribute="trailing" id="1ol-E3-weL"/>
                                 <constraint firstAttribute="bottom" secondItem="ctg-qb-z7i" secondAttribute="bottom" id="3Cw-QA-S6K"/>
@@ -131,21 +135,21 @@
                             <constraints>
                                 <constraint firstAttribute="width" constant="100" id="Fet-EN-b4p"/>
                             </constraints>
-                            <color key="thumbTintColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            <color key="thumbTintColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="sliderView:" destination="iN0-l3-epB" eventType="valueChanged" id="uPo-LT-7Ht"/>
                             </connections>
                         </slider>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1fk-aP-SJf" customClass="HBColorBall">
                             <rect key="frame" x="12" y="27" width="15" height="15"/>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="15" id="VJO-jI-6g1"/>
                                 <constraint firstAttribute="height" constant="15" id="tff-aB-q0L"/>
                             </constraints>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                    <color key="backgroundColor" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <gestureRecognizers/>
                     <constraints>
                         <constraint firstItem="1fk-aP-SJf" firstAttribute="leading" secondItem="nSf-MM-qjJ" secondAttribute="leading" constant="12" id="2TS-t7-XLt"/>
@@ -192,7 +196,7 @@
                                     <integer key="value" value="2"/>
                                 </userDefinedRuntimeAttribute>
                                 <userDefinedRuntimeAttribute type="color" keyPath="layer.borderColor">
-                                    <color key="value" red="0.93886126893939392" green="0.93886126893939392" blue="0.93886126893939392" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="value" red="0.93886126893939392" green="0.93886126893939392" blue="0.93886126893939392" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </userDefinedRuntimeAttribute>
                             </userDefinedRuntimeAttributes>
                             <connections>
@@ -213,7 +217,7 @@
                             </connections>
                         </collectionView>
                     </subviews>
-                    <color key="backgroundColor" red="0.53333333329999999" green="0.81568627449999997" blue="0.19215686269999999" alpha="1" colorSpace="calibratedRGB"/>
+                    <color key="backgroundColor" red="0.53333333329999999" green="0.81568627449999997" blue="0.19215686269999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="rdk-AS-Efn" secondAttribute="trailing" id="1hK-Ja-gIH"/>
                         <constraint firstItem="7oe-NL-7Zs" firstAttribute="leading" secondItem="flr-xX-PVV" secondAttribute="leading" constant="15" id="D3H-Hf-3qY"/>

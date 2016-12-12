@@ -382,6 +382,8 @@
 				TargetAttributes = {
 					5E1F3FA81BF33C4B00ACE525 = {
 						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = 26N4VZYSFU;
+						ProvisioningStyle = Manual;
 					};
 					5E1F3FC11BF33C4B00ACE525 = {
 						CreatedOnToolsVersion = 7.1;
@@ -613,10 +615,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 26N4VZYSFU;
 				INFOPLIST_FILE = HBDrawViewDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = whb.HBDrawViewDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HBtest.test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "b429f633-1ef6-43b1-b8b9-b0d6572433aa";
+				PROVISIONING_PROFILE_SPECIFIER = hbtest_Development;
 			};
 			name = Debug;
 		};
@@ -624,10 +630,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 26N4VZYSFU;
 				INFOPLIST_FILE = HBDrawViewDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = whb.HBDrawViewDemo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.HBtest.test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "b429f633-1ef6-43b1-b8b9-b0d6572433aa";
+				PROVISIONING_PROFILE_SPECIFIER = hbtest_Development;
 			};
 			name = Release;
 		};
@@ -698,6 +708,7 @@
 				5E1F3FD81BF33C4B00ACE525 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5E1F3FD91BF33C4B00ACE525 /* Build configuration list for PBXNativeTarget "HBDrawViewDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -706,6 +717,7 @@
 				5E1F3FDB1BF33C4B00ACE525 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5E1F3FDC1BF33C4B00ACE525 /* Build configuration list for PBXNativeTarget "HBDrawViewDemoUITests" */ = {
 			isa = XCConfigurationList;
@@ -714,6 +726,7 @@
 				5E1F3FDE1BF33C4B00ACE525 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

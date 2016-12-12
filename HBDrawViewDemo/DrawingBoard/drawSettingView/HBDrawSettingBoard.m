@@ -230,41 +230,31 @@ static NSString * const collectionCellID = @"collectionCellID";
 @end
 
 
+@interface HBColorBall()
+@property (nonatomic, strong) CAShapeLayer *shape;
+@end
+
 @implementation HBColorBall
 
 - (void)awakeFromNib
 {
+    [super awakeFromNib];
+    
     self.backgroundColor = [UIColor clearColor];
+    
+    [self.layer addSublayer:self.shape];
 
 }
 /*
     1 3 5 7
  */
 
-- (void)drawRect:(CGRect)rect
-{
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    CGContextSetLineWidth(context, 0);
-    
-    CGContextSetStrokeColorWithColor(context, self.ballColor.CGColor);
-    
-    CGContextAddArc(context, self.centerX, self.centerY, self.centerX, 0, 2 * M_PI, 0);
-    
-    CGContextSetFillColorWithColor(context, self.ballColor.CGColor);
-    
-    CGContextAddEllipseInRect(context, self.bounds);
-    
-    CGContextDrawPath(context, kCGPathFill);
-    
-}
-
 - (void)setBallColor:(UIColor *)ballColor
 {
     _ballColor = ballColor;
     
-    [self setNeedsDisplay];
-
+    self.shape.fillColor = self.ballColor.CGColor;
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:SendColorAndWidthNotification object:nil];
 }
 - (void)setBallSize:(CGFloat)ballSize
@@ -280,5 +270,13 @@ static NSString * const collectionCellID = @"collectionCellID";
     self.lineWidth = self.width / 2.0;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:SendColorAndWidthNotification object:nil];
+}
+- (CAShapeLayer *)shape
+{
+    if (!_shape) {
+        _shape = [[CAShapeLayer alloc] init];
+        _shape.path = [UIBezierPath bezierPathWithOvalInRect:self.bounds].CGPath;
+    }
+    return _shape;
 }
 @end
