@@ -53,16 +53,16 @@
     return self;
 }
 
-//- (void)drawRect:(CGRect)rect
-//{
-////
-//    for (HBPath *path in self.paths) {
-//        
-//        [path drawPath];
-//        
-//    }
+- (void)drawRect:(CGRect)rect
+{
 //
-//}
+    for (HBPath *path in self.paths) {
+        
+        [path drawPath];
+        
+    }
+
+}
 #pragma mark - Public_Methd
 - (void)clearAll
 {
@@ -71,7 +71,7 @@
     
     [self.paths removeAllObjects];
     
-//    [self setNeedsDisplay];
+    [self setNeedsDisplay];
 }
 - (void)backToLastDraw
 {
@@ -81,9 +81,9 @@
     
     [self.paths removeLastObject];
     
-    [lastpath.shape removeFromSuperlayer];
+//    [lastpath.shape removeFromSuperlayer];
     
-//    [self setNeedsDisplay];
+    [self setNeedsDisplay];
     
 }
 - (void)regeneration
@@ -94,8 +94,8 @@
     
     [self.tempPath removeLastObject];
     
-    [self.layer addSublayer:lastpath.shape];
-//    [self setNeedsDisplay];
+//    [self.layer addSublayer:lastpath.shape];
+    [self setNeedsDisplay];
     
 }
 - (void)eraser
@@ -206,9 +206,9 @@
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
     
 //    if (self.ise) {
-//        [self setNeedsDisplay];
+        [self setNeedsDisplay];
 //    }else{
-            [self.layer addSublayer:path.shape];
+//            [self.layer addSublayer:path.shape];
 //    }
 
     if (self.statusBlock) {
@@ -233,7 +233,7 @@
         [self.tempPoints removeLastObject];
     }
     
-//    [self setNeedsDisplay];
+    [self setNeedsDisplay];
 
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
     
