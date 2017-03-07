@@ -25,62 +25,32 @@ typedef NS_ENUM(NSInteger, HBDrawingShapeType)
     HBDrawingShapeRect,//矩形
     
 };
+typedef NS_ENUM(NSInteger, actionOpen) {
+    actionOpenAlbum,
+    actionOpenCamera
+};
 
-typedef void(^drawStatusBlock)(HBDrawingStatus drawingStatus, HBDrawModel *model);
-typedef void(^boardImageBlock)(UIImage *boardBackImage);
+
+
+
+@class HBDrawingBoard;
+
+@protocol HBDrawingBoardDelegate <NSObject>
+
+- (void)drawBoard:(HBDrawingBoard *)drawView action:(actionOpen)action;
+- (void)drawBoard:(HBDrawingBoard *)drawView drawingStatus:(HBDrawingStatus)drawingStatus model:(HBDrawModel *)model;
+
+@end
 
 @interface HBDrawingBoard : UIView
 
-/**
- *  @author 李泉, 16-05-31 16:05:35
- *
- *  @brief 是否是橡皮擦状态，默认为NO
- */
 @property (nonatomic, assign) BOOL ise;
-/**
- *  @author 李泉, 16-05-31 16:05:46
- *
- *  @brief 画笔类型
- */
+
 @property (nonatomic, assign) HBDrawingShapeType shapType;
-/**
- *  画笔宽度
- */
-@property (nonatomic, assign) CGFloat lineWidth;
-/**
- *  画笔颜色
- */
-@property (nonatomic, strong) UIColor *lineColor;
-/**
- *  画板背景
- */
-@property (nonatomic, strong) UIImage *boardBackImage;
-/**
- *  清屏
- */
-- (void)clearAll;
-/**
- *  撤销
- */
-- (void)backToLastDraw;
-/**
- *  恢复
- */
-- (void)regeneration;
-/**
- *  橡皮檫
- */
-- (void)eraser;
-/**
- *  保存到相册
- */
-- (void)saveCurrentImageToAlbum;
-/**
- *  获取绘制状态
- *
- *  @param stautsBlock 内含状态值
- */
-- (void)drawingStatus:(drawStatusBlock)stautsBlock;
+
+@property (nonatomic, strong) UIImageView *backImage;
+
+@property (nonatomic, weak) id<HBDrawingBoardDelegate> delegate;
 /**
  *  根据点的集合绘制      
  *
@@ -91,23 +61,31 @@ typedef void(^boardImageBlock)(UIImage *boardBackImage);
  *  @return YES -> 绘制完成  反之
  */
 - (BOOL)drawWithPoints:(HBDrawModel *)model;
-/**
- *  获取背景
- */
-- (void)getChangeBoardImage:(boardImageBlock)boardImage;
+- (void)showSettingBoard;
+- (void)hideSettingBoard;
+
 + (HBDrawModel *)objectWith:(NSDictionary *)dic;
 @end
 
 #pragma mark - HBPath
 @interface HBPath : NSObject
-@property (nonatomic, strong) CAShapeLayer *shape;
 
 @property (nonatomic, strong) UIColor *pathColor;//画笔颜色
+@property (nonatomic, assign) CGFloat lineWidth;
 @property (nonatomic, assign) BOOL isEraser;//橡皮擦
 @property (nonatomic, assign) HBDrawingShapeType shapType;
+@property (nonatomic, copy) NSString *imagePath;
+@property (nonatomic, strong) UIBezierPath *bezierPath;
+
 
 + (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth isEraser:(BOOL)isEraser;//初始化对象
 - (void)pathLineToPoint:(CGPoint)movePoint WithType:(HBDrawingShapeType)shapeType;//画
-- (void)drawPath;//绘制
+
+@end
+
+@interface HBDrawView : UIView
+
+- (void)setBrush:(HBPath *)path;
+
 @end
 

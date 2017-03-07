@@ -9,12 +9,13 @@
 #import "ViewController.h"
 #import "ZYQAssetPickerController.h"
 #import "UIView+WHB.h"
-#import "HBDrawView.h"
+#import "HBDrawingBoard.h"
+#import "MJExtension.h"
 
-@interface ViewController ()<ZYQAssetPickerControllerDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,HBDrawViewDelegate>
+@interface ViewController ()<ZYQAssetPickerControllerDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,HBDrawingBoardDelegate>
 
 
-@property (nonatomic, strong) HBDrawView *drawView;
+@property (nonatomic, strong) HBDrawingBoard *drawView;
 
 @end
 
@@ -34,14 +35,16 @@
     [self drawSetting:nil];
 }
 - (IBAction)drawSetting:(id)sender {
-    [self.drawView setDrawBoardShapeType:((UIButton *)sender).tag];
+    
+    self.drawView.shapType = ((UIButton *)sender).tag;
+    
     [self.drawView showSettingBoard];
 }
 #pragma mark - UIImagePickerControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
 {
     UIImage *image = info[UIImagePickerControllerOriginalImage];
-    [self.drawView setDrawBoardImage:image];
+    self.drawView.backImage.image = image;
     
     __weak typeof(self) weakSelf = self;
     [picker dismissViewControllerAnimated:YES completion:^{
@@ -70,12 +73,12 @@
         [marray addObject:image];
         
     }
+    self.drawView.backImage.image = [marray firstObject];
     
-    [self.drawView setDrawBoardImage:[marray firstObject]];
 }
-#pragma mark - HBDrawViewDelegate
-- (void)drawView:(HBDrawView *)drawView action:(actionOpen)action
-{
+#pragma mark - HBDrawingBoardDelegate
+- (void)drawBoard:(HBDrawingBoard *)drawView action:(actionOpen)action{
+
     switch (action) {
         case actionOpenAlbum:
         {
@@ -86,20 +89,20 @@
             picker.delegate = self;
             [self presentViewController:picker animated:YES completion:nil];
         }
-            
+
             break;
         case actionOpenCamera:
         {
             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-                
+
                 UIImagePickerController *pickVc = [[UIImagePickerController alloc] init];
-                
+
                 pickVc.sourceType = UIImagePickerControllerSourceTypeCamera;
                 pickVc.delegate = self;
                 [self presentViewController:pickVc animated:YES completion:nil];
-                
+
             }else{
-                
+
                 UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"提示" message:@"你没有摄像头" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
                 [alter show];
             }
@@ -109,12 +112,18 @@
         default:
             break;
     }
+    
 }
-- (HBDrawView *)drawView
+- (void)drawBoard:(HBDrawingBoard *)drawView drawingStatus:(HBDrawingStatus)drawingStatus model:(HBDrawModel *)model{
+    
+    NSLog(@"%@",model.keyValues);
+}
+- (HBDrawingBoard *)drawView
 {
     if (!_drawView) {
-        _drawView = [[HBDrawView alloc] initWithFrame:CGRectMake(0, 50, self.view.width, self.view.height)];
+        _drawView = [[HBDrawingBoard alloc] initWithFrame:CGRectMake(0, 50, self.view.width, self.view.height - 50)];
         _drawView.delegate = self;
+        
     }
     return _drawView;
 }

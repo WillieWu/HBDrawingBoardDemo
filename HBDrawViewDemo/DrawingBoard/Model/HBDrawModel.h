@@ -27,7 +27,7 @@
 @property (nonatomic, copy) NSString * action;
 @property (nonatomic, strong) NSNumber * paintSize;
 @property (nonatomic, strong) NSNumber * width;
-@property (nonatomic, strong) NSNumber * hight;
+@property (nonatomic, strong) NSNumber * height;
 @property (nonatomic, strong) NSNumber * isEraser;
 @property (nonatomic, strong) NSNumber * shapType;
 @end

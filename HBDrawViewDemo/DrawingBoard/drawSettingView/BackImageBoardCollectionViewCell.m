@@ -16,6 +16,7 @@
 @implementation BackImageBoardCollectionViewCell
 
 - (void)awakeFromNib {
+    [super awakeFromNib];
     self.layer.cornerRadius = 3;
     self.layer.borderWidth = 2;
     self.layer.borderColor = [UIColor whiteColor].CGColor;

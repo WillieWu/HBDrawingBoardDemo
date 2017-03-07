@@ -12,27 +12,37 @@
 #import "UIColor+help.h"
 #import "HBDrawPoint.h"
 #import "MJExtension.h"
-
+#import "HBDrawSettingBoard.h"
+#import "ZXCustomWindow.h"
+#import "NSFileManager+Helper.h"
 
 @interface HBDrawingBoard()
 {
     UIColor *_lastColor;
     CGFloat _lastLineWidth;
+    
+    CGFloat _lineWidth;
+    UIColor *_lineColor;
+
 }
 
 @property (nonatomic, strong) NSMutableArray *paths;
-
-@property (nonatomic, copy) drawStatusBlock statusBlock;
-
-@property (nonatomic, copy) boardImageBlock boardImage;
 
 @property (nonatomic, strong) NSMutableArray *tempPoints;
 
 @property (nonatomic, strong) NSMutableArray *tempPath;
 
+@property (nonatomic, strong) UIImageView *drawImage;
+
+@property (nonatomic, strong) HBDrawView *drawView;
+
+@property (nonatomic, strong) HBDrawSettingBoard *settingBoard;
+
+@property (nonatomic, strong) ZXCustomWindow *drawWindow;
+
 @end
 
-
+#define ThumbnailPath [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject] stringByAppendingPathComponent:@"HBThumbnail"]
 
 @implementation HBDrawingBoard
 
@@ -40,109 +50,37 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        
         self.backgroundColor = [UIColor clearColor];
+        
+        [self addSubview:self.backImage];
+        
+        [self addSubview:self.drawImage];
+
+        [self.drawImage addSubview:self.drawView];
         
          __weak typeof(self) weakSelf = self;
         //接受背景图片修改的通知
         [[NSNotificationCenter defaultCenter] addObserverForName:ImageBoardNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
             NSString *str = [note.userInfo objectForKey:@"imageBoardName"];
-            weakSelf.boardBackImage = [UIImage imageNamed:str];
+             weakSelf.backImage.image = [UIImage imageNamed:str];
         }];
+        
+//        接受画笔修改的通知
+        [[NSNotificationCenter defaultCenter] addObserverForName:SendColorAndWidthNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
+
+            _lineColor = [weakSelf.settingBoard getLineColor];
+            _lineWidth = [weakSelf.settingBoard getLineWidth];
+            
+        }];
+        
         
     }
     return self;
 }
 
-- (void)drawRect:(CGRect)rect
-{
-//
-    for (HBPath *path in self.paths) {
-        
-        [path drawPath];
-        
-    }
-
-}
 #pragma mark - Public_Methd
-- (void)clearAll
-{
-    
-    [self.layer.sublayers  makeObjectsPerformSelector:@selector(removeFromSuperlayer)];
-    
-    [self.paths removeAllObjects];
-    
-    [self setNeedsDisplay];
-}
-- (void)backToLastDraw
-{
-    HBPath *lastpath = [self.paths lastObject];
-    if (lastpath)
-        [self.tempPath addObject:lastpath];
-    
-    [self.paths removeLastObject];
-    
-//    [lastpath.shape removeFromSuperlayer];
-    
-    [self setNeedsDisplay];
-    
-}
-- (void)regeneration
-{
-    HBPath *lastpath = [self.tempPath lastObject];
-    if (lastpath)
-        [self.paths addObject:lastpath];
-    
-    [self.tempPath removeLastObject];
-    
-//    [self.layer addSublayer:lastpath.shape];
-    [self setNeedsDisplay];
-    
-}
-- (void)eraser
-{
-    if (!self.ise) {
-        //保存上次绘制状态
-        _lastColor = self.lineColor;
-        _lastLineWidth = self.lineWidth;
-        
-        //设置橡皮擦属性
-        self.lineColor = [UIColor clearColor];
-        self.ise = YES;
-        
-    }else{
-        
-        self.ise = NO;
-        self.shapType = HBDrawingShapeCurve;
-        self.lineColor = _lastColor;
-        self.lineWidth = _lastLineWidth;
-        
-    }
-
-}
-- (void)saveCurrentImageToAlbum
-{
-    CGSize screen_size = [UIScreen mainScreen].bounds.size;
-    
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(screen_size.width * [UIScreen mainScreen].scale, screen_size.height * [UIScreen mainScreen].scale), NO, 0.0);
-    
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    [self.superview.layer renderInContext:context];
-    
-    UIImage *getImage = UIGraphicsGetImageFromCurrentImageContext();
-    
-    UIGraphicsEndImageContext();
-    
-    UIImageWriteToSavedPhotosAlbum(getImage, nil, nil, nil);
-    
-}
-
-- (void)drawingStatus:(drawStatusBlock)stautsBlock
-{
-    self.statusBlock = stautsBlock;
-}
-- (BOOL)drawWithPoints:(HBDrawModel *)model
-{
+- (BOOL)drawWithPoints:(HBDrawModel *)model{
 
     self.userInteractionEnabled = NO;
     
@@ -150,24 +88,24 @@
     CGFloat xPix = ([UIScreen mainScreen].bounds.size.width * [UIScreen mainScreen].scale);
     CGFloat yPix = ([UIScreen mainScreen].bounds.size.height * [UIScreen mainScreen].scale);
     CGFloat xp = model.width.floatValue / xPix;
-    CGFloat yp = model.hight.floatValue / yPix;
+    CGFloat yp = model.height.floatValue / yPix;
     
     HBDrawPoint *point = [model.pointList firstObject];
     
-    HBPath *path = [HBPath pathToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) pathWidth:model.paintSize.floatValue isEraser:self.ise];
+    HBPath *path = [HBPath pathToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) pathWidth:model.paintSize.floatValue isEraser:model.isEraser.boolValue];
     path.pathColor = [UIColor colorWithHexString:model.paintColor];
-    path.isEraser = model.isEraser.boolValue;
-    
-    NSMutableArray *marray = [model.pointList mutableCopy];
-    [marray removeObjectAtIndex:0];
     
     [self.paths addObject:path];
     
+    NSMutableArray *marray = [model.pointList mutableCopy];
+    
+    [marray removeObjectAtIndex:0];
+
     [marray enumerateObjectsUsingBlock:^(HBDrawPoint *point, NSUInteger idx, BOOL *stop) {
         
-        [path pathLineToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) WithType:self.shapType];
+        [path pathLineToPoint:CGPointMake(point.x.floatValue * xp , point.y.floatValue * yp) WithType:HBDrawingShapeCurve];
         
-        [self setNeedsDisplay];
+        [self.drawView setBrush:path];
         
     }];
     
@@ -178,10 +116,7 @@
 {
     return [HBDrawModel objectWithKeyValues:dic];
 }
-- (void)getChangeBoardImage:(boardImageBlock)boardImage
-{
-    self.boardImage = boardImage;
-}
+
 #pragma mark - CustomMethd
 - (CGPoint)getTouchSet:(NSSet *)touches{
     
@@ -189,32 +124,21 @@
      return [touch locationInView:self];
 
 }
+
 #pragma mark - Touch
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    
     CGPoint point = [self getTouchSet:touches];
 
-    HBPath *path = [HBPath pathToPoint:point pathWidth:self.lineWidth isEraser:self.ise];
+    HBPath *path = [HBPath pathToPoint:point pathWidth:_lineWidth isEraser:self.ise];
 
-    path.shape.strokeColor = self.lineColor.CGColor;
-
-    path.pathColor = self.lineColor;
+    path.pathColor = _lineColor;
+    
+    path.imagePath = [NSString stringWithFormat:@"%@.png",[self getTimeString]];
     
     [self.paths addObject:path];
-    
-    [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
-    
-//    if (self.ise) {
-        [self setNeedsDisplay];
-//    }else{
-//            [self.layer addSublayer:path.shape];
-//    }
 
-    if (self.statusBlock) {
-        self.statusBlock(HBDrawingStatusMove,nil);
-    }
-    
+    [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -226,85 +150,130 @@
     
     [path pathLineToPoint:point WithType:self.shapType];
     
-    if (self.shapType == HBDrawingShapeCurve) {
-        [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
-    }
-    if (self.shapType == HBDrawingShapeLine || ((self.shapType == HBDrawingShapeRect)||((self.shapType == HBDrawingShapeEllipse) && !(self.tempPoints.count == 1)))) {
-        [self.tempPoints removeLastObject];
+    if (self.ise) {
+        [self setEraseBrush:path];
+    }else{
+        [self.drawView setBrush:path];
     }
     
-    [self setNeedsDisplay];
-
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
-    
-    if (self.statusBlock) {
-        self.statusBlock(HBDrawingStatusMove,nil);
-    }
-
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [self touchesMoved:touches withEvent:event];
+    
+    HBPath *path = [self.paths lastObject];
+    
+    UIImage *image = [self screenshot:self.drawImage];
+    
+    self.drawImage.image = image;
+    
+    [self.drawView setBrush:nil];
+    
+    NSData *imageData = UIImagePNGRepresentation(image);//UIImageJPEGRepresentation(image, 0.4);
+    
+    NSString *filePath = [ThumbnailPath stringByAppendingPathComponent:path.imagePath];
 
-    CGPoint point = [self getTouchSet:touches];
+    BOOL isSave = [NSFileManager hb_saveData:imageData filePath:filePath];
     
-    [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
-    
+    if (isSave) {
+        
+        NSLog(@"%@", [NSString stringWithFormat:@"保存成功: %@",filePath]);
+    }
     HBDrawModel *model = [[HBDrawModel alloc] init];
-    model.paintColor = [self.lineColor toColorString];
-    model.paintSize = @(self.lineWidth);
-    model.isEraser = [NSNumber numberWithBool:self.ise];
+    model.paintColor = [_lineColor toColorString];
+    model.paintSize = @(_lineWidth);
+    model.isEraser = [NSNumber numberWithBool:path.isEraser];
     model.pointList = self.tempPoints;
     model.shapType = [NSNumber numberWithInteger:self.shapType];
     
-    if (self.statusBlock) {
-        self.statusBlock(HBDrawingStatusEnd,model);
+    if ([self.delegate respondsToSelector:@selector(drawBoard:drawingStatus:model:)]) {
+        [self.delegate drawBoard:self drawingStatus:HBDrawingStatusEnd model:model];
     }
+
     //清空
     [self.tempPoints removeAllObjects];
 
 }
-
-#pragma mark - Lazying
-- (NSMutableArray *)paths
+- (void)setEraseBrush:(HBPath *)path{
+    
+    UIGraphicsBeginImageContextWithOptions(self.frame.size, false, 0);
+    
+    [self.drawImage.image drawInRect:self.bounds];
+    
+    [[UIColor clearColor] set];
+    
+    path.bezierPath.lineWidth = _lineWidth;
+    
+    [path.bezierPath strokeWithBlendMode:kCGBlendModeClear alpha:1.0];
+    
+    [path.bezierPath stroke];
+    
+    self.drawImage.image = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    
+}
+- (UIImage *)screenshot:(UIView *)shotView{
+    
+    UIGraphicsBeginImageContextWithOptions(self.frame.size, NO, 0.0);
+    
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    [shotView.layer renderInContext:context];
+    
+    UIImage *getImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    
+    return getImage;
+}
+- (NSString *)getTimeString{
+    
+    NSDateFormatter  *dateformatter = nil;
+    if (!dateformatter) {
+        dateformatter = [[NSDateFormatter alloc] init];
+    }
+    
+    [dateformatter setDateFormat:@"YYYYMMddHHmmssSSS"];
+    
+    return [dateformatter stringFromDate:[NSDate dateWithTimeIntervalSinceNow:0]];
+}
+- (void)showSettingBoard
 {
+    [self.drawWindow showWithAnimationTime:0.25];
+}
+- (void)hideSettingBoard
+{
+    [self.drawWindow hideWithAnimationTime:0.25];
+}
+#pragma mark - Lazying
+- (NSMutableArray *)paths{
     if (!_paths) {
         _paths = [NSMutableArray array];
     }
     return _paths;
 }
-- (NSMutableArray *)tempPoints
-{
+- (NSMutableArray *)tempPoints{
     if (!_tempPoints) {
         _tempPoints = [NSMutableArray array];
     }
     return _tempPoints;
 }
-- (NSMutableArray *)tempPath
-{
+- (NSMutableArray *)tempPath{
     if (!_tempPath) {
         _tempPath = [NSMutableArray array];
     }
     return _tempPath;
 }
-- (void)setShapType:(HBDrawingShapeType)shapType
-{
+- (void)setShapType:(HBDrawingShapeType)shapType{
     if (self.ise) {
         return;
     }
     _shapType = shapType;
 }
 
-- (void)setBoardBackImage:(UIImage *)boardBackImage
-{
-    _boardBackImage = boardBackImage;
-    
-    if (self.boardImage) {
-        self.boardImage(boardBackImage);
-    }
-    
-}
 - (void)setLineColor:(UIColor *)lineColor
 {
     if (self.ise) {
@@ -321,23 +290,190 @@
     _lineWidth = lineWidth;
     _lastLineWidth = lineWidth;
 }
+- (UIImageView *)backImage
+{
+    if (!_backImage) {
+        _backImage = [[UIImageView alloc] initWithFrame:self.bounds];
+
+    }
+    return _backImage;
+}
+- (UIImageView *)drawImage
+{
+    if (!_drawImage) {
+        _drawImage = [[UIImageView alloc] initWithFrame:self.bounds];
+        _drawImage.contentMode = UIViewContentModeScaleAspectFit;
+    }
+    return _drawImage;
+}
+- (HBDrawView *)drawView{
+    if (!_drawView) {
+        _drawView = [HBDrawView new];
+        _drawView.backgroundColor = [UIColor clearColor];
+        _drawView.frame = self.bounds;
+        
+    }
+    return _drawView;
+}
+- (HBDrawSettingBoard *)settingBoard
+{
+    if (!_settingBoard) {
+
+        _settingBoard = [[[NSBundle mainBundle] loadNibNamed:@"HBDrawSettingBoard" owner:nil options:nil] firstObject];
+        _settingBoard.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width, 191);
+
+        __weak typeof(self) weakSelf = self;
+        [_settingBoard getSettingType:^(setType type) {
+
+            switch (type) {
+                case setTypePen:
+                {
+                    self.ise = NO;
+                    self.lineColor = [UIColor whiteColor];
+                    self.shapType = HBDrawingShapeCurve;
+                    self.lineWidth = 1.5;
+                }
+                    break;
+                case setTypeCamera:
+                {
+                    [self hideSettingBoard];
+
+                    if ([self.delegate respondsToSelector:@selector(drawBoard:action:)]) {
+                        [self.delegate drawBoard:self action:actionOpenCamera];
+                    }
+
+                }
+                    break;
+                case setTypeAlbum:
+                {
+                    [self hideSettingBoard];
+
+                    if ([self.delegate respondsToSelector:@selector(drawBoard:action:)]) {
+                        [self.delegate drawBoard:self action:actionOpenAlbum];
+                    }
+                }
+                    break;
+                case setTypeSave:
+                {
+                    [weakSelf.drawWindow hideWithAnimationTime:0.25];
+                    UIImageWriteToSavedPhotosAlbum([self screenshot:self], nil, nil, nil);
+                    NSLog(@"保存成功");
+                }
+                    break;
+                case setTypeEraser:
+                {
+                    
+                    if (!self.ise) {
+                        //保存上次绘制状态
+                        _lastColor = _lineColor;
+                        _lastLineWidth = _lineWidth;
+                        
+                        //设置橡皮擦属性
+                        _lineColor = [UIColor clearColor];
+                        
+                        self.ise = YES;
+                        
+                    }else{
+                        
+                        self.ise = NO;
+                        self.shapType = HBDrawingShapeCurve;
+                        _lineColor = _lastColor;
+                        _lineWidth = _lastLineWidth;
+                        
+                    }
+                    
+                }
+                    break;
+                case setTypeBack:
+                {
+                    
+                    if (self.paths.count == 1) {
+                        
+                        NSLog(@"已经最后一张了，不能撤退了");
+                        return;
+                    }
+
+                    HBPath *lastpath = [self.paths lastObject];
+                    
+                    [self.tempPath addObject:lastpath];
+                    
+                    [self.paths removeLastObject];
+                    
+                    HBPath *path = [self.paths lastObject];
+                    
+                    UIImage *getImage = [NSFileManager hb_getImageFileName:[ThumbnailPath stringByAppendingPathComponent:path.imagePath]];
+                    self.drawImage.image = getImage;
+                    
+                }
+                    break;
+                case setTyperegeneration:
+                {
+                    
+                    if (self.tempPath.count == 0) {
+                        
+                        NSLog(@"已经最新一张了，不能回滚了");
+                        return;
+                    }
+
+                    HBPath *lastpath = [self.tempPath lastObject];
+                    
+                    [self.paths addObject:lastpath];
+                    
+                    [self.tempPath removeLastObject];
+                    
+                    HBPath *path = [self.paths lastObject];
+                    
+                    UIImage *getImage = [NSFileManager hb_getImageFileName:[ThumbnailPath stringByAppendingPathComponent:path.imagePath]];
+                    self.drawImage.image = getImage;
+                    
+                }
+                    break;
+                case setTypeClearAll:
+                {
+
+                    [self.paths removeAllObjects];
+                    [self.tempPath removeAllObjects];
+                    [self.tempPoints removeAllObjects];
+                    
+                    [NSFileManager deleteFile:ThumbnailPath];
+                    
+                    self.drawImage.image = nil;
+                    
+                    
+                }
+                    break;
+
+                default:
+                    break;
+            }
+        }];
+
+    }
+    return _settingBoard;
+}
+- (ZXCustomWindow *)drawWindow
+{
+    if (!_drawWindow) {
+        _drawWindow = [[ZXCustomWindow alloc] initWithAnimationView:self.settingBoard];
+    }
+    return _drawWindow;
+}
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:ImageBoardNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:SendColorAndWidthNotification object:nil];
 }
 @end
 
 #pragma mark - HBPath
 @interface HBPath()
 
-@property (nonatomic, strong) UIBezierPath *bezierPath;
 @property (nonatomic, assign) CGPoint beginPoint;
 @property (nonatomic, assign) CGFloat pathWidth;
 
 @end
 
 @implementation HBPath
-
 
 + (instancetype)pathToPoint:(CGPoint)beginPoint pathWidth:(CGFloat)pathWidth isEraser:(BOOL)isEraser
 {
@@ -353,15 +489,6 @@
     [bezierPath moveToPoint:beginPoint];
     path.bezierPath = bezierPath;
     
-    CAShapeLayer *shapeLayer = [[CAShapeLayer alloc] init];
-    shapeLayer.lineCap = kCALineCapRound;
-    shapeLayer.lineJoin = kCALineJoinRound;
-    shapeLayer.lineWidth = pathWidth;
-    shapeLayer.fillColor = [UIColor clearColor].CGColor;
-    shapeLayer.path = bezierPath.CGPath;
-    path.shape = shapeLayer;
-    
-    
     return path;
 }
 //HBDrawingShapeCurve = 0,//曲线
@@ -376,7 +503,6 @@
         case HBDrawingShapeCurve:
         {
             [self.bezierPath addLineToPoint:movePoint];
-            if (self.isEraser) [self.bezierPath strokeWithBlendMode:kCGBlendModeClear alpha:1.0];
         }
             break;
         case HBDrawingShapeLine:
@@ -408,13 +534,7 @@
         default:
             break;
     }
-    self.shape.path = self.bezierPath.CGPath;
-}
-- (void)drawPath
-{
-    [self.pathColor set];
-    if (self.isEraser) [self.bezierPath strokeWithBlendMode:kCGBlendModeClear alpha:1.0];
-    [self.bezierPath stroke];
+//    self.shape.path = self.bezierPath.CGPath;
 }
 
 - (CGRect)getRectWithStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint
@@ -427,5 +547,29 @@
     CGFloat height = fabs(startPoint.y - endPoint.y);
     return CGRectMake(orignal.x , orignal.y , width, height);
 }
+
+@end
+
+@implementation HBDrawView
+
++ (Class)layerClass
+{
+    return [CAShapeLayer class];
+}
+
+- (void)setBrush:(HBPath *)path
+{
+    CAShapeLayer *shapeLayer = (CAShapeLayer *)self.layer;
+    
+    shapeLayer.strokeColor = path.pathColor.CGColor;
+    shapeLayer.fillColor = [UIColor clearColor].CGColor;
+    shapeLayer.lineJoin = kCALineJoinRound;
+    shapeLayer.lineCap = kCALineCapRound;
+    shapeLayer.lineWidth = path.bezierPath.lineWidth;
+    ((CAShapeLayer *)self.layer).path = path.bezierPath.CGPath;
+    
+    
+}
+
 
 @end

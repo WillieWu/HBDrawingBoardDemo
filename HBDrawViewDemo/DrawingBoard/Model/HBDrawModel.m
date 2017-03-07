@@ -20,7 +20,8 @@
     if (self) {
         self.action = Action_playing;
         self.width = @([UIScreen mainScreen].bounds.size.width);
-        self.width = @([UIScreen mainScreen].bounds.size.height);
+        self.height = @([UIScreen mainScreen].bounds.size.height);
+        
     }
     return self;
 }
