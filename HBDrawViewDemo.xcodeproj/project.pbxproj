@@ -40,7 +40,6 @@
 		5E1F40381BF33C9D00ACE525 /* ZYQAssetPickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E1F401C1BF33C9D00ACE525 /* ZYQAssetPickerController.m */; };
 		5E1F404D1BF3416100ACE525 /* HBDrawCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E1F404C1BF3416100ACE525 /* HBDrawCommon.m */; };
 		5E1F404F1BF3430400ACE525 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E1F404E1BF3430400ACE525 /* UIKit.framework */; };
-		5E7685791E56C8D700F31513 /* timg.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 5E7685781E56C8D700F31513 /* timg.jpeg */; };
 		5EB303F61E6D6CF400424712 /* NSFileManager+Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EB303F51E6D6CF400424712 /* NSFileManager+Helper.m */; };
 /* End PBXBuildFile section */
 
@@ -126,7 +125,6 @@
 		5E1F404B1BF3414200ACE525 /* HBDrawCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HBDrawCommon.h; sourceTree = "<group>"; };
 		5E1F404C1BF3416100ACE525 /* HBDrawCommon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HBDrawCommon.m; sourceTree = "<group>"; };
 		5E1F404E1BF3430400ACE525 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		5E7685781E56C8D700F31513 /* timg.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = timg.jpeg; sourceTree = "<group>"; };
 		5EB303F41E6D6CF400424712 /* NSFileManager+Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Helper.h"; sourceTree = "<group>"; };
 		5EB303F51E6D6CF400424712 /* NSFileManager+Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Helper.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -181,7 +179,6 @@
 		5E1F3FAB1BF33C4B00ACE525 /* HBDrawViewDemo */ = {
 			isa = PBXGroup;
 			children = (
-				5E7685781E56C8D700F31513 /* timg.jpeg */,
 				5E1F3FDF1BF33C9D00ACE525 /* DrawingBoard */,
 				5E1F40051BF33C9D00ACE525 /* MJExtension */,
 				5E1F401B1BF33C9D00ACE525 /* ZYQAssetPickerController.h */,
@@ -425,7 +422,6 @@
 			files = (
 				5E1F401F1BF33C9D00ACE525 /* BackImageBoardCollectionViewCell.xib in Resources */,
 				5E1F40221BF33C9D00ACE525 /* HBDrawSettingBoard.xib in Resources */,
-				5E7685791E56C8D700F31513 /* timg.jpeg in Resources */,
 				5E1F3FBC1BF33C4B00ACE525 /* LaunchScreen.storyboard in Resources */,
 				5E1F3FB91BF33C4B00ACE525 /* Assets.xcassets in Resources */,
 				5E1F3FB71BF33C4B00ACE525 /* Main.storyboard in Resources */,
