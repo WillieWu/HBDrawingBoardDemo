@@ -139,6 +139,10 @@
     [self.paths addObject:path];
 
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
+    
+    if ([self.delegate respondsToSelector:@selector(drawBoard:drawingStatus:model:)]) {
+        [self.delegate drawBoard:self drawingStatus:HBDrawingStatusBegin model:nil];
+    }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -157,6 +161,10 @@
     }
     
     [self.tempPoints addObject:[HBDrawPoint drawPoint:point]];
+    
+    if ([self.delegate respondsToSelector:@selector(drawBoard:drawingStatus:model:)]) {
+        [self.delegate drawBoard:self drawingStatus:HBDrawingStatusMove model:nil];
+    }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event

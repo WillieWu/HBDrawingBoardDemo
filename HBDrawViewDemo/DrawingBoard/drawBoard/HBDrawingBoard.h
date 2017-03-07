@@ -71,10 +71,10 @@ typedef NS_ENUM(NSInteger, actionOpen) {
 @interface HBPath : NSObject
 
 @property (nonatomic, strong) UIColor *pathColor;//画笔颜色
-@property (nonatomic, assign) CGFloat lineWidth;
+@property (nonatomic, assign) CGFloat lineWidth;//线宽
 @property (nonatomic, assign) BOOL isEraser;//橡皮擦
-@property (nonatomic, assign) HBDrawingShapeType shapType;
-@property (nonatomic, copy) NSString *imagePath;
+@property (nonatomic, assign) HBDrawingShapeType shapType;//绘制样式
+@property (nonatomic, copy) NSString *imagePath;//图片路径
 @property (nonatomic, strong) UIBezierPath *bezierPath;
 
 
