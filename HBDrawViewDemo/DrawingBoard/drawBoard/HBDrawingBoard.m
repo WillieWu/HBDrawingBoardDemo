@@ -547,13 +547,19 @@
 
 - (CGRect)getRectWithStartPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint
 {
-    CGPoint orignal = startPoint;
+    CGPoint origin = startPoint;
     if (startPoint.x > endPoint.x) {
-        orignal = endPoint;
+        origin.x = endPoint.x;
     }
+    
+    if (startPoint.y > endPoint.y) {
+        origin.y = endPoint.y;
+    }
+    
     CGFloat width = fabs(startPoint.x - endPoint.x);
     CGFloat height = fabs(startPoint.y - endPoint.y);
-    return CGRectMake(orignal.x , orignal.y , width, height);
+    
+    return CGRectMake(origin.x, origin.y, width, height);
 }
 
 @end
